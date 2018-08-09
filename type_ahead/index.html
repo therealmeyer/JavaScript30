@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+  <script>
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+    const cities = [];
+    // fetch(endpoint).then(blob => blob.json()).then(data => cities.push(...data));
+    document.addEventListener("DOMContentLoaded", () => {
+      $.ajax({ 
+        url: endpoint,
+        method: 'get', 
+        dataType: 'json' 
+      }).then(data => cities.push(...data));
+    });
+
+    function findMatches(word, cities) {
+      const regex = new RegExp(word, 'gi');
+      return cities.filter(city => {
+        return city.city.match(regex) || city.state.match(regex);
+      })
+    }
+
+    function displayMatches() {
+      const matchArr = findMatches(this.value, cities);
+      
+
+      const html = matchArr.map(place => {
+        const regex = new RegExp(this.value, 'gi');
+        const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`)
+        const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`)
+        return (`<li>
+          <span>${cityName}, ${stateName}</span>
+        </li>`);  
+      }).join('');
+      suggestions.innerHTML = html;
+    }
+
+    const suggestions = document.querySelector('.suggestions');
+    const searchInput = document.querySelector('.search');
+    searchInput.addEventListener('keyup', displayMatches);
+   
+
+  </script>
+</body>
+
+</html>
